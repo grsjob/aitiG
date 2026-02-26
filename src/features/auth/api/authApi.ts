@@ -1,5 +1,5 @@
 import { baseApi } from '../../../shared/api/baseApi.ts';
-import type { LoginRequest, LoginResponse } from '../model/types.ts';
+import type { LoginRequest, LoginResponse, User } from '../model/types.ts';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -26,8 +26,32 @@ export const authApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Auth'],
     }),
+    fetchUser: builder.query<User, void>({
+      query: () => ({
+        url: '/auth/me',
+        method: 'GET',
+      }),
+      providesTags: ['Auth'],
+    }),
+    logout: builder.mutation<void, void>({
+      query: () => ({
+        url: '/auth/logout',
+        method: 'POST',
+      }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('accessToken');
+          sessionStorage.removeItem('refreshToken');
+        }
+      },
+      invalidatesTags: ['Auth'],
+    }),
   }),
   overrideExisting: false,
 });
 
-export const { useLoginMutation } = authApi;
+export const { useLoginMutation, useLazyFetchUserQuery } = authApi;
