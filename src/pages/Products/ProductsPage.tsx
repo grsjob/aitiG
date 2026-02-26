@@ -1,3 +1,5 @@
+import { Products } from '../../features/products/ui/Products.tsx';
+
 export const ProductsPage = () => {
-  return <div>Продукты</div>;
+  return <Products />;
 };
