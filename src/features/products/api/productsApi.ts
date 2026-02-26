@@ -5,7 +5,7 @@ export const productsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query<ProductsResponse, { limit?: number; skip?: number }>({
       query: ({ limit = 10, skip = 0 }) => ({
-        url: 'products',
+        url: '/products',
         method: 'GET',
         params: { limit, skip },
       }),
@@ -20,7 +20,7 @@ export const productsApi = baseApi.injectEndpoints({
 
     getProductById: builder.query<Product, number>({
       query: (id) => ({
-        url: `products/${id}`,
+        url: `/products/${id}`,
         method: 'GET',
       }),
       providesTags: (_, __, id) => [{ type: 'Product', id }],
@@ -28,7 +28,7 @@ export const productsApi = baseApi.injectEndpoints({
 
     searchProducts: builder.query<ProductsResponse, string>({
       query: (searchTerm) => ({
-        url: 'products/search',
+        url: '/products/search',
         method: 'GET',
         params: { q: searchTerm },
       }),
@@ -37,7 +37,7 @@ export const productsApi = baseApi.injectEndpoints({
 
     addProduct: builder.mutation<Product, Partial<Product>>({
       query: (product) => ({
-        url: 'products/add',
+        url: '/products/add',
         method: 'POST',
         data: product,
       }),

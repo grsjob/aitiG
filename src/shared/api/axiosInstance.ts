@@ -1,6 +1,6 @@
 import axios from 'axios';
 export const axiosInstance = axios.create({
-  baseURL: 'https://dummyjson.com/',
+  baseURL: '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,36 +24,42 @@ axiosInstance.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-    }
 
-    try {
-      const refreshToken =
-        localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
+      try {
+        const refreshToken =
+          localStorage.getItem('refreshToken') || sessionStorage.getItem('refreshToken');
 
-      if (refreshToken) {
-        const response = await axiosInstance.post('/auth/refresh', {
-          refreshToken,
-          expiresInMins: 30,
-        });
+        if (refreshToken) {
+          const response = await axiosInstance.post('/auth/refresh', {
+            refreshToken,
+            expiresInMins: 30,
+          });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
-        sessionStorage.setItem('accessToken', accessToken);
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-        localStorage.setItem('refreshToken', newRefreshToken);
-        sessionStorage.setItem('refreshToken', newRefreshToken);
+          if (localStorage.getItem('refreshToken')) {
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', newRefreshToken);
+          } else if (sessionStorage.getItem('refreshToken')) {
+            sessionStorage.setItem('accessToken', accessToken);
+            sessionStorage.setItem('refreshToken', newRefreshToken);
+          }
 
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return axiosInstance(originalRequest);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return axiosInstance(originalRequest);
+        }
+      } catch (refreshError) {
+        localStorage.removeItem('accessToken');
+        sessionStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('refreshToken');
+
+        window.location.href = '/login';
+
+        return Promise.reject(refreshError);
       }
-    } catch (error) {
-      localStorage.removeItem('accessToken');
-      sessionStorage.removeItem('accessToken');
-
-      localStorage.removeItem('refreshToken');
-      sessionStorage.removeItem('refreshToken');
-
-      return Promise.reject(error);
     }
+
+    return Promise.reject(error);
   }
 );

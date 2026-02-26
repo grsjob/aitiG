@@ -1,11 +1,11 @@
 import { baseApi } from '../../../shared/api/baseApi.ts';
-import type { LoginRequest, LoginResponse, RefreshResponse } from '../model/types.ts';
+import type { LoginRequest, LoginResponse, RefreshResponse, User } from '../model/types.ts';
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest & { rememberMe?: boolean }>({
       query: (credentials) => ({
-        url: 'auth/login',
+        url: '/auth/login',
         method: 'POST',
         data: {
           username: credentials.username,
@@ -29,7 +29,7 @@ export const authApi = baseApi.injectEndpoints({
 
     refreshToken: builder.mutation<RefreshResponse, void>({
       query: () => ({
-        url: 'auth/refresh',
+        url: '/auth/refresh',
         method: 'POST',
         data: {
           expiresInMins: 30,
@@ -47,9 +47,16 @@ export const authApi = baseApi.injectEndpoints({
         return response;
       },
     }),
+    fetchUser: builder.query<User, void>({
+      query: () => ({
+        url: '/auth/me',
+        method: 'GET',
+      }),
+      providesTags: ['Auth'],
+    }),
     logout: builder.mutation<void, void>({
       query: () => ({
-        url: 'auth/logout',
+        url: '/auth/logout',
         method: 'POST',
       }),
       async onQueryStarted(_, { queryFulfilled }) {
@@ -68,4 +75,10 @@ export const authApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useLoginMutation, useRefreshTokenMutation, useLogoutMutation } = authApi;
+export const {
+  useLoginMutation,
+  useRefreshTokenMutation,
+  useFetchUserQuery,
+  useLogoutMutation,
+  useLazyFetchUserQuery,
+} = authApi;

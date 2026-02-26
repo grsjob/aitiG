@@ -1,18 +1,37 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { AuthState } from './types.ts';
+import type { AuthState, User } from './types.ts';
 import { authApi } from '../api/authApi.ts';
 
-const initialState: AuthState = {
-  user: null,
-  isLoading: false,
-  error: null,
-  rememberMe: false,
+const getInitialState = (): AuthState => {
+  const localStorageToken = localStorage.getItem('accessToken');
+  const sessionStorageToken = sessionStorage.getItem('accessToken');
+
+  if (localStorageToken || sessionStorageToken) {
+    return {
+      user: null,
+      isLoading: false,
+      error: null,
+      rememberMe: !!localStorageToken,
+    };
+  }
+
+  return {
+    user: null,
+    isLoading: false,
+    error: null,
+    rememberMe: false,
+  };
 };
+
+const initialState: AuthState = getInitialState();
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+    },
     setRememberMe: (state, action: PayloadAction<boolean>) => {
       state.rememberMe = action.payload;
     },
@@ -46,5 +65,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setRememberMe, logout } = authSlice.actions;
+export const { setUser, setRememberMe, logout } = authSlice.actions;
 export default authSlice.reducer;

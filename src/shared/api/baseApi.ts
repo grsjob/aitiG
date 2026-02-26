@@ -4,7 +4,7 @@ import { axiosBaseQuery } from './axiosBaseQuery.ts';
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery({
-    baseUrl: 'https://dummyjson.com/',
+    baseUrl: '/api',
   }),
   endpoints: () => ({}),
   tagTypes: ['Product', 'Auth'],
